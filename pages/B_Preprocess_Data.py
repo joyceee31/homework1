@@ -3,7 +3,6 @@ import pandas as pd                     # pip install pandas
 import matplotlib.pyplot as plt        # pip install matplotlib
 from sklearn.model_selection import train_test_split
 import streamlit as st                  # pip install streamlit
-import plotly.express as px
 
 st.markdown("# Practical Applications of Machine Learning (PAML)")
 
