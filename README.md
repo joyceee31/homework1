@@ -3,9 +3,7 @@
 The goal of Homework 1 assignment is to build your first end-to-end Machine Learning (ML) pipeline using public datasets and by creating your own datasets. The <b>learning outcomes</b> for this assignment are: 
 
 * Build framework for end-to-end ML pipeline in Streamlit. Create your first web application! 
-* Dataset curation - Develop web application that walks users through steps of ML pipeline starting with data visualization and preprocessing steps. 
-* Preprocessing techniques - Perform data labeling study (in-class activity during week on ‘Dataset Acquisition and Curation’).
-
+* Develop web application that walks users through steps of ML pipeline starting with data visualization and preprocessing steps. 
 
 This assignment is contains two parts:
 
@@ -78,8 +76,19 @@ git checkout master
 git pull
 ```
 
+## Run Github AutoGrader
+Run Github autograder using the following command in the termal:
+```
+pytest
+```
+
 * end-to-end-ml-pipeline.ipynb: This is the example from the textbook on predicting housing prices. We will use this notebook to create an online ML end-to-end pipeline. We will focus on data collction and preprocessing steps.
-* end-to-end-ml-pipeline.py: HW1 assignment template using streamlit for web application UI and workflow of activties.
+* end-to-end-ml-pipeline.py: HW1 assignment template using streamlit for web application UI and workflow of activties. 
+* pages/*.py files: Contains code to explore data, preprocess it and prepare it for ML. It includes checkpoints for the homework assignment.
+* datasets: folder that conatins the dataset used for HW1 in 'housing/housing.csv'
+* notebooks: contains example notebooks for HW1
+* test_homework1.py: contains Github autograder functions
+* images/: contains images for readme
 
 # 1. Build End-to-End ML Pipeline
 
@@ -227,11 +236,7 @@ Test end-to-end pipeline application using:
 streamlit run end-to-end-ml-pipeline.py
 ```
 
-# 2. Dataset Curation for ML Tasks
-
-In-class activity during week on ‘Dataset Acquisition and Curation’.
-
-# 3. Reflection Assessment
+# 2. Reflection Assessment
 
 Submit on Canvas.
 
