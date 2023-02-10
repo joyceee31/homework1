@@ -55,7 +55,7 @@ def test_impute_zero():
     e_zero_df = pd.read_csv("test_dataframe_file/Zero.csv")
     e_X = e_dataframe.loc[:, ~e_dataframe.columns.isin(['median_house_value'])]
 
-    s_zero_df = B_Preprocess_Data.impute_dataset(e_X, 'Zero', numeric_columns, nan_colns)
+    s_zero_df = B_Preprocess_Data.impute_dataset(e_X, 'Zero')#, numeric_columns, nan_colns)
     pd.testing.assert_frame_equal(e_zero_df,s_zero_df)
 
 
@@ -63,7 +63,7 @@ def test_impute_median():
     e_median_df = pd.read_csv("test_dataframe_file/Median.csv")
     e_X = e_dataframe.loc[:, ~e_dataframe.columns.isin(['median_house_value'])]
 
-    s_median_df = B_Preprocess_Data.impute_dataset(e_X, 'Median', numeric_columns, nan_colns)
+    s_median_df = B_Preprocess_Data.impute_dataset(e_X, 'Median')#, numeric_columns, nan_colns)
     pd.testing.assert_frame_equal(e_median_df,s_median_df)
 
 
@@ -71,7 +71,7 @@ def test_impute_mean():
     e_mean_df = pd.read_csv("test_dataframe_file/Mean.csv")
     e_X = e_dataframe.loc[:, ~e_dataframe.columns.isin(['median_house_value'])]
 
-    s_mean_df = B_Preprocess_Data.impute_dataset(e_X, 'Mean', numeric_columns, nan_colns)
+    s_mean_df = B_Preprocess_Data.impute_dataset(e_X, 'Mean')#, numeric_columns, nan_colns)
     pd.testing.assert_frame_equal(e_mean_df,s_mean_df)
 
 
