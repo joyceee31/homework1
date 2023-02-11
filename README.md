@@ -39,7 +39,7 @@ Next, let's update the libraries. First, let's update `conda` itself:
 conda update -c defaults -n base conda
 ```
 
-And recreate the environment:
+[Optional: if not done already] And recreate the environment:
 ```
 conda env create -f environment.yml
 ```
