@@ -49,8 +49,9 @@ def load_dataset(data):
     Output: pandas dataframe df
     - Checkpoint 1 - Read .csv file containing a dataset
     """
-    pass
-    return 0
+    # Erro checking - check for string
+    df = pd.read_csv(data)
+    return df
 
 # Checkpoint 2
 def compute_correlation(X,features):
@@ -58,8 +59,8 @@ def compute_correlation(X,features):
     Input: X is pandas dataframe, features is a list of feature name (string) ['age','height']
     Output: correlation coefficients between one or more features
     """
-    pass
-    return 0
+    correlation = X[features].corr()
+    return correlation
 
 # Helper Function
 def user_input_features(df):
@@ -119,25 +120,34 @@ def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
 # Create two columns for dataset upload
 # Call functions to upload data or restore dataset
 col1, col2 = st.columns(2)
-# with(col1):
-# with(col2):
 
-data=None
+with(col1): # uploading from local machine
+    data = st.file_uploader('Upload your data', type=['csv','txt'])
+with(col2): # upload from cloud
+    data_path = st.text_input("Enter data url", "", key="data_url")
+
+    if(data_path):
+        fetch_housing_data()
+        data = os.path.join(HOUSING_PATH, "housing.csv")
+        st.write("You entered: ", data_path)
+
+#data=None
 if data:
     ###################### EXPLORE DATASET #######################
     st.markdown('### Explore Dataset Features')
 
     # Load dataset
-    #df = load_dataset(...)
+    df = load_dataset(data)
+    st.write(df)
 
     # Restore dataset if already in memory
+    st.session_state['house_df'] = df
 
     # Display feature names and descriptions (from feature_lookup)
-    #display_features(...,feature_lookup)
+    display_features(df,feature_lookup)
     
     # Display dataframe as table using streamlit dataframe function
-
-    # Select feature to explore
+    st.dataframe(df)
 
     ###################### VISUALIZE DATASET #######################
     st.markdown('### Visualize Features')
@@ -146,18 +156,48 @@ if data:
     st.sidebar.header('Specify Input Parameters')
 
     # Collect user plot selection
-
+    st.sidebar.header('Select type of chart')
+    chart_select = st.sidebar.selectbox(
+        label = 'Types of chart',
+        options = [ 'Scatterplot', 'Lineplot', 'Histogram', 'Boxplot']
+    )
+    st.write(chart_select)
+    numeric_columns = list(df.select_dtypes(['float','int']).columns)
     # Draw plots including Scatterplots, Histogram, Lineplots, Boxplot
-    
+    if( chart_select == 'Scatterplot'):
+        try:
+            x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
+            y_values = st.sidebar.selectbox('Y axis', options=numeric_columns)
+            side_bar_data = user_input_features(df)
+            plot = px.scatter(data_frame=df, 
+                                x=x_values, 
+                                y=y_values, 
+                                range_x=[df[x_values].min(), 
+                                side_bar_data[x_values]], 
+                                range_y=[df[y_values].min(), 
+                                side_bar_data[y_values]])
+            st.write(plot)
+        except Exception as e:
+            print(e)
     ###################### CORRELATION ANALYSIS #######################
     st.markdown("### Looking for Correlations")
 
     # Collect features for correlation analysis using multiselect
 
     # Compute correlation between selected features 
-    #correlation = compute_correlation(...)
-    #st.write(correlation) 
+    select_features = st.multiselect(
+            'Select two or features for correlation',
+            options=numeric_columns
+    )
+    correlation = compute_correlation(df,select_features)
+    st.write(correlation) 
 
     # Display correlation of all feature pairs 
+    if(select_features):
+        try:
+          fig = scatter_matrix(df[select_features], figsize=(12,8)) 
+          st.pyplot(fig[0][0].get_figure()) 
+        except Exception as e:
+            print(e)
     
     st.markdown('Continue to Preprocess Data')

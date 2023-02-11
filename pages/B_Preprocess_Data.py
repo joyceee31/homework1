@@ -23,6 +23,15 @@ def restore_dataset():
     Output: 
     """
     df=None
+    if 'house_df' not in st.session_state:
+        data = st.file_uploader('Upload a Dataset', type=['csv', 'txt'])
+        if data:
+            df = pd.read_csv(data)
+            st.session_state['house_df'] = df
+        else:
+            return None
+    else:
+        df = st.session_state['house_df']
     return df
 
 # Checkpoint 3
@@ -74,9 +83,10 @@ if df is not None:
     st.markdown('View initial data with missing values or invalid inputs')
 
     # Display original dataframe
+    st.write(df)
 
     # Show summary of missing values including the 1) number of categories with missing values, average number of missing values per category, and Total number of missing values
-
+    st.markdown('Number of categories with missing values: {0:.2f}'.format(df.isna().any(axis=0).sum()))
     ############################################# MAIN BODY #############################################
 
     #numeric_columns = list(df.select_dtypes(['float','int']).columns)
