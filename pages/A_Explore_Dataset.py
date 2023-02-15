@@ -1,13 +1,13 @@
 import streamlit as st                  
 import pandas as pd
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 from pandas.plotting import scatter_matrix
 import os
 import tarfile
 import urllib.request
+
 
 DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
 HOUSING_PATH = os.path.join("datasets", "housing")
@@ -49,8 +49,9 @@ def load_dataset(data):
     Output: pandas dataframe df
     - Checkpoint 1 - Read .csv file containing a dataset
     """
-    # Erro checking - check for string
+    #error checking - check for string
     df = pd.read_csv(data)
+
     return df
 
 # Checkpoint 2
@@ -59,7 +60,9 @@ def compute_correlation(X,features):
     Input: X is pandas dataframe, features is a list of feature name (string) ['age','height']
     Output: correlation coefficients between one or more features
     """
-    correlation = X[features].corr()
+    
+    correlation = X[features].corr() #feature is name of feature (string type)
+   
     return correlation
 
 # Helper Function
@@ -69,6 +72,7 @@ def user_input_features(df):
     Output: dictionary of sidebar filters on features
     """
     numeric_columns = list(df.select_dtypes(['float','int']).columns)
+    # categorical_columns = list(df.select_dtypes(['string']).columns)
     side_bar_data = {}
     for feature in numeric_columns:
         try:
@@ -76,6 +80,13 @@ def user_input_features(df):
         except Exception as e:
             print(e)
         side_bar_data[feature] = f
+
+    # for feature in categorical_columns:
+    #     try:
+    #         f = st.sidebar.selectbox(str(feature))
+    #     except Exception as e:
+    #         print(e)
+    #     side_bar_data[feature] = f
     return side_bar_data
 
 # Helper Function
@@ -120,18 +131,17 @@ def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
 # Create two columns for dataset upload
 # Call functions to upload data or restore dataset
 col1, col2 = st.columns(2)
+with(col1): #uploading from local machine
+    data = st.file_uploader('Upload your data', type = ['csv'])
+with(col2): #uoload from cloud
+    data_path = st.text_input("Eneter data url", "", key = "data_url")
 
-with(col1): # uploading from local machine
-    data = st.file_uploader('Upload your data', type=['csv','txt'])
-with(col2): # upload from cloud
-    data_path = st.text_input("Enter data url", "", key="data_url")
 
     if(data_path):
         fetch_housing_data()
         data = os.path.join(HOUSING_PATH, "housing.csv")
         st.write("You entered: ", data_path)
 
-#data=None
 if data:
     ###################### EXPLORE DATASET #######################
     st.markdown('### Explore Dataset Features')
@@ -147,7 +157,8 @@ if data:
     display_features(df,feature_lookup)
     
     # Display dataframe as table using streamlit dataframe function
-    st.dataframe(df)
+
+    # Select feature to explore
 
     ###################### VISUALIZE DATASET #######################
     st.markdown('### Visualize Features')
@@ -158,46 +169,115 @@ if data:
     # Collect user plot selection
     st.sidebar.header('Select type of chart')
     chart_select = st.sidebar.selectbox(
-        label = 'Types of chart',
-        options = [ 'Scatterplot', 'Lineplot', 'Histogram', 'Boxplot']
+        label = 'Types of charts',
+        options = ['Scatterplot', 'Historgram', 'Boxplot', 'Lineplot']
     )
+
     st.write(chart_select)
     numeric_columns = list(df.select_dtypes(['float','int']).columns)
+    categorical_columns = list(df.select_dtypes(['string']).columns)
     # Draw plots including Scatterplots, Histogram, Lineplots, Boxplot
-    if( chart_select == 'Scatterplot'):
-        try:
-            x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
-            y_values = st.sidebar.selectbox('Y axis', options=numeric_columns)
+    if(chart_select == 'Scatterplot'):
+        try: 
+            x_values = st.sidebar.selectbox('X axis', options = numeric_columns)
+            y_values = st.sidebar.selectbox('Y axis', options = numeric_columns)
             side_bar_data = user_input_features(df)
-            plot = px.scatter(data_frame=df, 
-                                x=x_values, 
-                                y=y_values, 
-                                range_x=[df[x_values].min(), 
-                                side_bar_data[x_values]], 
-                                range_y=[df[y_values].min(), 
-                                side_bar_data[y_values]])
+            plot = px.scatter(df, x = x_values, y = y_values, range_x = [df[x_values].min(),
+                                side_bar_data[x_values]],
+                                range_y = [df[y_values].min(), side_bar_data[y_values]])
+
             st.write(plot)
         except Exception as e:
             print(e)
+
+    if(chart_select == 'Historgram'):
+        try: 
+
+            x_values = st.sidebar.selectbox('X axis', options=numeric_columns)
+            fig = px.histogram(df, x=x_values)
+            st.plotly_chart(fig)
+
+        except Exception as e:
+            print(e)
+
+    if(chart_select == 'Boxplot'):
+        try: 
+            x_values = st.sidebar.selectbox('X axis', options = numeric_columns)
+            side_bar_data = user_input_features(df)
+            fig = px.box(df, x=x_values)
+            st.plotly_chart(fig)
+            # plot = px.histogram(df, x = x_values, nbins=30)
+            # st.write(plot)
+        except Exception as e:
+            print(e)
+
+    if (chart_select == 'Lineplot'):
+        try: 
+            x_value = st.sidebar.selectbox('X axis', options=numeric_columns)
+            y_value = st.sidebar.selectbox('Y axis', options=numeric_columns)
+            plot = px.line(df, x=x_value, y=y_value)
+            st.write(plot)
+        except Exception as e:
+            print(e)
+
+
     ###################### CORRELATION ANALYSIS #######################
     st.markdown("### Looking for Correlations")
 
     # Collect features for correlation analysis using multiselect
+    st.markdown("### Select secondary features for visualize of correlation analysis")
+
+    # Use Streamlit to allow the user to select up to 4 features
+    st.header("Select up to 4 features for Correlation")
+    selected_features = st.multiselect("Select features to view the scatter matrix", df.columns.tolist(), default=df.columns.tolist()[:2])
+
+    # Compute the correlation for the selected features
+    correlation = compute_correlation(df, selected_features)
+
+    # Display the correlation to the user
+    st.write("The correlation matrix between the selected features is:")
+    st.write(correlation)
+
+
+
+
 
     # Compute correlation between selected features 
-    select_features = st.multiselect(
-            'Select two or features for correlation',
-            options=numeric_columns
-    )
-    correlation = compute_correlation(df,select_features)
-    st.write(correlation) 
+    # correlation = compute_correlation(df, select_features)
 
+    # st.write(correlation)
     # Display correlation of all feature pairs 
-    if(select_features):
+
+    if selected_features:
         try:
-          fig = scatter_matrix(df[select_features], figsize=(12,8)) 
-          st.pyplot(fig[0][0].get_figure()) 
+
+            corr_matrix = df[selected_features].corr()
+            st.write(corr_matrix)
+
+            # sns.set_style("darkgrid")
+            # scatter_matrix = sns.pairplot(df[selected_features],diag_kind="hist", diag_kws=dict(bins=30))
+            # scatter_matrix = sns.pairplot(df[selected_features])
+            # st.pyplot(scatter_matrix.fig)
+            # scatter_matrix = px.scatter_matrix(df[selected_features], dimensions=selected_features, labels={col: col for col in selected_features})
+            # scatter_matrix.update_traces(diagonal_visible=True)
+            # Create scatter matrix
+#             scatter_matrix = px.scatter_matrix(
+#             df[selected_features], 
+#             dimensions=selected_features, 
+#             color=selected_features[0],  # set color to first selected feature
+#             labels={col: col for col in selected_features},
+#             opacity=0.7
+# )
+
+#             # Set diagonal to histogram
+#             scatter_matrix.update_traces(diagonal_visible=True)
+            # fig = pd.plotting.scatter_matrix(df[selected_features], alpha=0.2)
+            # st.pyplot(fig
+            fig = scatter_matrix(df[selected_features], figsize=(12,8)) 
+            st.pyplot(fig[0][0].get_figure()) 
+            # st.plotly_chart(scatter_matrix)
+      
         except Exception as e:
-            print(e)
-    
+            st.write(e)
+   
     st.markdown('Continue to Preprocess Data')
